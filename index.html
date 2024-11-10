@@ -6,19 +6,24 @@
   <title>PayPal Payment Integration</title>
 </head>
 <body>
-  <p>Select your payment method:</p>
-  <a href="https://pay.google.com/gp/p/ui/pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR" style="text-decoration: none;">
-      <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-         Pay ₹1 with Google Pay
-      </button>
+  <p>Select your preferred UPI app:</p>
+  <a href="intent://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end" style="text-decoration: none;">
+     <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+        Pay ₹1 via Google Pay
+     </button>
   </a>
   
-  <a href="phonepe://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR" style="text-decoration: none;">
-      <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-         Pay ₹1 with PhonePe
-      </button>
+  <a href="intent://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end" style="text-decoration: none;">
+     <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+        Pay ₹1 via PhonePe
+     </button>
   </a>
   
-
+  <a href="intent://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end" style="text-decoration: none;">
+     <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+        Pay ₹1 via BHIM
+     </button>
+  </a>
+  
 </body>
 </html>
