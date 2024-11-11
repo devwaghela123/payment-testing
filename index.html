@@ -1,29 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PayPal Payment Integration</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Your Doubt</title>
 </head>
 <body>
-  <p>Select your preferred UPI app:</p>
-  <a href="intent://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end" style="text-decoration: none;">
-     <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-        Pay ₹1 via Google Pay
-     </button>
-  </a>
-  
-  <a href="intent://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end" style="text-decoration: none;">
-     <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-        Pay ₹1 via PhonePe
-     </button>
-  </a>
-  
-  <a href="intent://pay?pa=9594439233@jio&pn=WealthWire&am=1&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end" style="text-decoration: none;">
-     <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-        Pay ₹1 via BHIM
-     </button>
-  </a>
-  
+
+    <h3>Submit Your Doubt</h3>
+    <form id="doubtForm">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="doubt">Doubt:</label><br>
+        <textarea id="doubt" name="doubt" rows="4" required></textarea><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <p id="response"></p>
+
+    <script>
+        document.getElementById("doubtForm").onsubmit = function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(document.getElementById("doubtForm"));
+
+            fetch("https://script.google.com/macros/s/AKfycbxSaKdcVBcsaQvqLptLIcngqKPu8CuxXlQbBUUPLCZTVpZ0DUpqmw6Oxy9Sitv5j0IWcQ/exec", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById("response").innerText = text;
+                document.getElementById("doubtForm").reset();
+            })
+            .catch(error => {
+                document.getElementById("response").innerText = "An error occurred. Please try again.";
+            });
+        };
+    </script>
+
 </body>
 </html>
+
+
+
