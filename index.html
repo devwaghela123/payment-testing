@@ -2,160 +2,234 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Set the viewport for a mobile-friendly experience -->
+  <!-- Ensures the design scales properly on mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Swipe Cards Demo</title>
   <style>
-    /* Reset and basic styles */
+    /* Reset some basic styles */
     * {
-      box-sizing: border-box;
-    }
-    html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      background-color: #f0f2f5;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
+      box-sizing: border-box;
     }
-    /* Container holding all cards */
+    /* Body with a light background and mobile-friendly settings */
+    body {
+      background: #f7f7f7;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      position: relative;
+      height: 100vh;
+    }
+    /* Container to hold all the swipe cards */
     #card-container {
       position: relative;
       width: 100%;
-      height: 100vh;
-      overflow: hidden;
+      height: 100%;
     }
-    /* Each card styling */
+    /* Styling for each profile card */
     .card {
       position: absolute;
       width: 90%;
       max-width: 400px;
-      height: 70%;
-      left: 50%;
+      height: 70vh;
       top: 50%;
-      /* Center the card */
+      left: 50%;
       transform: translate(-50%, -50%);
-      background: #fff;
-      border-radius: 10px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 20px;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      /* Smooth transition for snapping back or swiping off */
-      transition: transform 0.3s ease-out;
-      /* Prevent text selection during swiping */
-      user-select: none;
+      overflow: hidden;
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     }
-    /* Card image styling */
-    .card img {
-      width: 100%;
-      height: auto;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
-    }
-    /* Card info (name) styling */
-    .card-info {
-      padding: 15px;
-      font-size: 22px;
-      text-align: center;
-    }
-    /* “No more profiles” message styling */
-    .no-more {
+    /* A gradient overlay at the bottom for text readability */
+    .card::before {
+      content: "";
       position: absolute;
-      width: 100%;
-      height: 100vh;
-      top: 0;
       left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      right: 0;
+      bottom: 0;
+      height: 40%;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      z-index: 1;
+    }
+    /* Profile info (name, age) positioned at the bottom */
+    .card .info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 2;
+      color: #fff;
+    }
+    .card .info h2 {
       font-size: 24px;
-      color: #333;
+      margin-bottom: 5px;
+    }
+    .card .info p {
+      font-size: 16px;
+    }
+    /* "LIKE" and "NOPE" indicators that appear during swipes */
+    .card .like,
+    .card .dislike {
+      position: absolute;
+      top: 20px;
+      font-size: 32px;
+      font-weight: bold;
+      padding: 10px 20px;
+      border: 4px solid;
+      border-radius: 10px;
+      opacity: 0;
+      z-index: 3;
+    }
+    .card .like {
+      left: 20px;
+      color: #00e676;
+      border-color: #00e676;
+      transform: rotate(-20deg);
+    }
+    .card .dislike {
+      right: 20px;
+      color: #ff1744;
+      border-color: #ff1744;
+      transform: rotate(20deg);
+    }
+    /* Message shown when there are no more profiles */
+    #no-more {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <!-- Container for the swipeable cards -->
+  <!-- Container for the cards -->
   <div id="card-container"></div>
 
   <script>
-    // Set a threshold in pixels for a successful swipe
-    const swipeThreshold = 100; 
+    /* Array of five profile objects (feel free to replace the images/values) */
+    const profiles = [
+      { name: "Alice", age: 28, img: "https://source.unsplash.com/collection/190727/400x600?sig=1" },
+      { name: "Bella", age: 26, img: "https://source.unsplash.com/collection/190727/400x600?sig=2" },
+      { name: "Cara",  age: 30, img: "https://source.unsplash.com/collection/190727/400x600?sig=3" },
+      { name: "Diana", age: 25, img: "https://source.unsplash.com/collection/190727/400x600?sig=4" },
+      { name: "Eva",   age: 29, img: "https://source.unsplash.com/collection/190727/400x600?sig=5" }
+    ];
 
-    // These functions use 'this' to refer to the card element being touched.
-    function handleTouchStart(e) {
-      // Remove any ongoing transition so the card follows your finger
-      this.style.transition = '';
-      // Store the starting X/Y coordinates on the card element
-      this.startX = e.touches[0].clientX;
-      this.startY = e.touches[0].clientY;
-      // Attach move and end listeners to this card
-      this.addEventListener('touchmove', handleTouchMove);
-      this.addEventListener('touchend', handleTouchEnd);
+    const container = document.getElementById('card-container');
+
+    // Create and add cards in reverse order so that the first profile is on top.
+    profiles.reverse().forEach(profile => {
+      const card = createCard(profile);
+      container.appendChild(card);
+    });
+
+    // Function to create a card element with profile info and swipe listeners.
+    function createCard(profile) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.backgroundImage = `url(${profile.img})`;
+
+      // Create the info element (name, age)
+      const info = document.createElement('div');
+      info.className = 'info';
+      info.innerHTML = `<h2>${profile.name}, ${profile.age}</h2>`;
+      card.appendChild(info);
+
+      // Create the "LIKE" indicator
+      const like = document.createElement('div');
+      like.className = 'like';
+      like.textContent = "LIKE";
+      card.appendChild(like);
+
+      // Create the "NOPE" indicator
+      const dislike = document.createElement('div');
+      dislike.className = 'dislike';
+      dislike.textContent = "NOPE";
+      card.appendChild(dislike);
+
+      // Add touch (swipe) event listeners to this card.
+      addSwipeListeners(card);
+      return card;
     }
 
-    function handleTouchMove(e) {
-      // Calculate how far the finger has moved from the start point
-      const dx = e.touches[0].clientX - this.startX;
-      const dy = e.touches[0].clientY - this.startY;
-      // Rotate a bit for a natural feel (rotation is proportional to horizontal movement)
-      this.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 10}deg)`;
+    // Function to add swipe behavior to a card
+    function addSwipeListeners(card) {
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let currentY = 0;
+      let offsetX = 0;
+
+      // On touch start, record the initial position.
+      card.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        card.style.transition = ''; // Remove any previous transition
+      }, { passive: true });
+
+      // On touch move, calculate the offset and apply a translation & rotation.
+      card.addEventListener('touchmove', (e) => {
+        currentX = e.touches[0].clientX;
+        currentY = e.touches[0].clientY;
+        offsetX = currentX - startX;
+        const offsetY = currentY - startY;
+        // Rotate a bit as the card is dragged horizontally.
+        const rotation = offsetX * 0.1;
+        card.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`;
+
+        // Update the opacity of the like/dislike labels based on swipe direction.
+        const like = card.querySelector('.like');
+        const dislike = card.querySelector('.dislike');
+        if (offsetX > 0) {
+          like.style.opacity = Math.min(offsetX / 100, 1);
+          dislike.style.opacity = 0;
+        } else if (offsetX < 0) {
+          dislike.style.opacity = Math.min(-offsetX / 100, 1);
+          like.style.opacity = 0;
+        }
+      }, { passive: true });
+
+      // When the touch ends, determine whether to accept the swipe or snap back.
+      card.addEventListener('touchend', () => {
+        // If the horizontal movement is more than 100px, consider it a swipe.
+        if (Math.abs(offsetX) > 100) {
+          const direction = offsetX > 0 ? 1 : -1;
+          card.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+          // Animate the card off-screen.
+          card.style.transform = `translate(${direction * window.innerWidth}px, 0px) rotate(${direction * 45}deg)`;
+          card.style.opacity = 0;
+          // Remove the card after the animation completes.
+          setTimeout(() => {
+            card.remove();
+            if (container.children.length === 0) {
+              showNoMoreProfiles();
+            }
+          }, 500);
+        } else {
+          // If not swiped far enough, reset the card position.
+          card.style.transition = 'transform 0.3s ease-out';
+          card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+          // Hide the indicators.
+          const like = card.querySelector('.like');
+          const dislike = card.querySelector('.dislike');
+          like.style.opacity = 0;
+          dislike.style.opacity = 0;
+        }
+      });
     }
 
-    function handleTouchEnd(e) {
-      // Remove the move and end listeners now that the touch is finished
-      this.removeEventListener('touchmove', handleTouchMove);
-      this.removeEventListener('touchend', handleTouchEnd);
-
-      const dx = e.changedTouches[0].clientX - this.startX;
-      // Check if the horizontal movement is more than the threshold
-      if (Math.abs(dx) > swipeThreshold) {
-        // Determine which direction and swipe the card off screen
-        const toX = dx > 0 ? window.innerWidth : -window.innerWidth;
-        this.style.transition = 'transform 0.3s ease-out';
-        this.style.transform = `translate(${toX}px, 0px) rotate(${dx / 10}deg)`;
-        // After the transition ends, remove the card and update the top card
-        this.addEventListener('transitionend', function () {
-          this.remove();
-          updateTopCard();
-        }, { once: true });
-      } else {
-        // If not swiped far enough, snap back to the original center position
-        this.style.transition = 'transform 0.3s ease-out';
-        this.style.transform = '';
-        // Clean up after the snap-back animation completes
-        this.addEventListener('transitionend', function () {
-          this.style.transition = '';
-        }, { once: true });
-      }
-    }
-
-    // After a card is removed, attach the touchstart listener to the new top card.
-    function updateTopCard() {
-      const cards = document.querySelectorAll('.card');
-      if (cards.length > 0) {
-        // The top card is the last one in the container (highest z-index)
-        const topCard = cards[cards.length - 1];
-        topCard.addEventListener('touchstart', handleTouchStart);
-      } else {
-        // If there are no cards left, show a message.
-        showNoMoreProfiles();
-      }
-    }
-
+    // Function to display a message when there are no more profiles.
     function showNoMoreProfiles() {
-      const container = document.getElementById('card-container');
       const message = document.createElement('div');
-      message.className = 'no-more';
-      message.textContent = 'No more profiles';
+      message.id = 'no-more';
+      message.textContent = "No more profiles";
       container.appendChild(message);
     }
+  </script>
+</body>
+</html>
 
-    // When the DOM is loaded, create our card elements.
-    document.addEventListener('DOMContentLoaded', function () {
-      // Array of profile objects (each with a name and an image URL).
-      const profiles = [
-        { name: "Alice", image: "https://via.placeholder.com/400x600?text=Alice" },
-       
 
