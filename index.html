@@ -2,31 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensures the design scales properly on mobile -->
+  <!-- Ensures proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Swipe Cards Demo</title>
+  <title>Swipe for Love</title>
   <style>
-    /* Reset some basic styles */
+    /* Basic reset */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    /* Body with a light background and mobile-friendly settings */
+
+    /* Use a minimal system font like Apple’s */
     body {
-      background: #f7f7f7;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
       position: relative;
       height: 100vh;
     }
-    /* Container to hold all the swipe cards */
+
+    /* Container holding all the cards */
     #card-container {
       position: relative;
       width: 100%;
       height: 100%;
     }
-    /* Styling for each profile card */
+
+    /* Card styling – clean, rounded, and subtle shadow */
     .card {
       position: absolute;
       width: 90%;
@@ -37,106 +40,80 @@
       transform: translate(-50%, -50%);
       background-size: cover;
       background-position: center;
-      border-radius: 20px;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       overflow: hidden;
       transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     }
-    /* A gradient overlay at the bottom for text readability */
-    .card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 40%;
-      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-      z-index: 1;
-    }
-    /* Profile info (name, age) positioned at the bottom */
-    .card .info {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      z-index: 2;
-      color: #fff;
-    }
-    .card .info h2 {
-      font-size: 24px;
-      margin-bottom: 5px;
-    }
-    .card .info p {
-      font-size: 16px;
-    }
-    /* "LIKE" and "NOPE" indicators that appear during swipes */
+
+    /* “LIKE” and “NOPE” labels (styled minimally) */
     .card .like,
     .card .dislike {
       position: absolute;
       top: 20px;
-      font-size: 32px;
+      font-size: 24px;
       font-weight: bold;
-      padding: 10px 20px;
-      border: 4px solid;
-      border-radius: 10px;
+      padding: 8px 16px;
+      border: 2px solid;
+      border-radius: 8px;
       opacity: 0;
       z-index: 3;
+      user-select: none;
     }
     .card .like {
       left: 20px;
-      color: #00e676;
-      border-color: #00e676;
-      transform: rotate(-20deg);
+      color: #28a745;
+      border-color: #28a745;
+      transform: rotate(-15deg);
     }
     .card .dislike {
       right: 20px;
-      color: #ff1744;
-      border-color: #ff1744;
-      transform: rotate(20deg);
+      color: #dc3545;
+      border-color: #dc3545;
+      transform: rotate(15deg);
     }
-    /* Message shown when there are no more profiles */
+
+    /* Final message styling */
     #no-more {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 24px;
-      color: #555;
+      font-size: 32px;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
-  <!-- Container for the cards -->
+  <!-- The container for swipe cards -->
   <div id="card-container"></div>
 
   <script>
-    /* Array of five profile objects (feel free to replace the images/values) */
+    // Replace these image URLs with actual photos of her.
     const profiles = [
-      { name: "Alice", age: 28, img: "https://source.unsplash.com/collection/190727/400x600?sig=1" },
-      { name: "Bella", age: 26, img: "https://source.unsplash.com/collection/190727/400x600?sig=2" },
-      { name: "Cara",  age: 30, img: "https://source.unsplash.com/collection/190727/400x600?sig=3" },
-      { name: "Diana", age: 25, img: "https://source.unsplash.com/collection/190727/400x600?sig=4" },
-      { name: "Eva",   age: 29, img: "https://source.unsplash.com/collection/190727/400x600?sig=5" }
+      { img: "https://source.unsplash.com/random/400x600?face&sig=1" },
+      { img: "https://source.unsplash.com/random/400x600?face&sig=2" },
+      { img: "https://source.unsplash.com/random/400x600?face&sig=3" },
+      { img: "https://source.unsplash.com/random/400x600?face&sig=4" },
+      { img: "https://source.unsplash.com/random/400x600?face&sig=5" }
     ];
 
     const container = document.getElementById('card-container');
 
-    // Create and add cards in reverse order so that the first profile is on top.
+    // Reverse the array so that the first photo is on top.
     profiles.reverse().forEach(profile => {
       const card = createCard(profile);
       container.appendChild(card);
     });
 
-    // Function to create a card element with profile info and swipe listeners.
+    // Creates a swipeable card element.
     function createCard(profile) {
       const card = document.createElement('div');
       card.className = 'card';
       card.style.backgroundImage = `url(${profile.img})`;
-
-      // Create the info element (name, age)
-      const info = document.createElement('div');
-      info.className = 'info';
-      info.innerHTML = `<h2>${profile.name}, ${profile.age}</h2>`;
-      card.appendChild(info);
 
       // Create the "LIKE" indicator
       const like = document.createElement('div');
@@ -150,12 +127,11 @@
       dislike.textContent = "NOPE";
       card.appendChild(dislike);
 
-      // Add touch (swipe) event listeners to this card.
       addSwipeListeners(card);
       return card;
     }
 
-    // Function to add swipe behavior to a card
+    // Adds touch-based swipe functionality to a card.
     function addSwipeListeners(card) {
       let startX = 0;
       let startY = 0;
@@ -163,24 +139,21 @@
       let currentY = 0;
       let offsetX = 0;
 
-      // On touch start, record the initial position.
       card.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
-        card.style.transition = ''; // Remove any previous transition
+        card.style.transition = ''; // Remove transition for immediate response.
       }, { passive: true });
 
-      // On touch move, calculate the offset and apply a translation & rotation.
       card.addEventListener('touchmove', (e) => {
         currentX = e.touches[0].clientX;
         currentY = e.touches[0].clientY;
         offsetX = currentX - startX;
         const offsetY = currentY - startY;
-        // Rotate a bit as the card is dragged horizontally.
         const rotation = offsetX * 0.1;
         card.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`;
 
-        // Update the opacity of the like/dislike labels based on swipe direction.
+        // Update the opacity of the like/dislike labels.
         const like = card.querySelector('.like');
         const dislike = card.querySelector('.dislike');
         if (offsetX > 0) {
@@ -192,44 +165,36 @@
         }
       }, { passive: true });
 
-      // When the touch ends, determine whether to accept the swipe or snap back.
       card.addEventListener('touchend', () => {
-        // If the horizontal movement is more than 100px, consider it a swipe.
+        // If swiped more than 100px horizontally, remove the card.
         if (Math.abs(offsetX) > 100) {
           const direction = offsetX > 0 ? 1 : -1;
           card.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
-          // Animate the card off-screen.
           card.style.transform = `translate(${direction * window.innerWidth}px, 0px) rotate(${direction * 45}deg)`;
           card.style.opacity = 0;
-          // Remove the card after the animation completes.
           setTimeout(() => {
             card.remove();
             if (container.children.length === 0) {
-              showNoMoreProfiles();
+              showFinalMessage();
             }
           }, 500);
         } else {
-          // If not swiped far enough, reset the card position.
+          // Snap back if not swiped far enough.
           card.style.transition = 'transform 0.3s ease-out';
           card.style.transform = 'translate(0px, 0px) rotate(0deg)';
-          // Hide the indicators.
-          const like = card.querySelector('.like');
-          const dislike = card.querySelector('.dislike');
-          like.style.opacity = 0;
-          dislike.style.opacity = 0;
+          card.querySelector('.like').style.opacity = 0;
+          card.querySelector('.dislike').style.opacity = 0;
         }
       });
     }
 
-    // Function to display a message when there are no more profiles.
-    function showNoMoreProfiles() {
+    // Displays the final "I love you" message.
+    function showFinalMessage() {
       const message = document.createElement('div');
       message.id = 'no-more';
-      message.textContent = "No more profiles";
+      message.innerHTML = "I love you <br> ❤️";
       container.appendChild(message);
     }
   </script>
 </body>
 </html>
-
-
