@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensures proper scaling on mobile devices -->
+  <!-- Ensure mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Swipe for Love</title>
+  <!-- Load Quicksand font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
   <style>
     /* Basic reset */
     * {
@@ -13,23 +15,23 @@
       box-sizing: border-box;
     }
 
-    /* Use a minimal system font like Apple’s */
+    /* Use a clean, minimalist style */
     body {
       background: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: 'Quicksand', sans-serif;
       overflow: hidden;
       position: relative;
       height: 100vh;
     }
 
-    /* Container holding all the cards */
+    /* Container holding the cards */
     #card-container {
       position: relative;
       width: 100%;
       height: 100%;
     }
 
-    /* Card styling – clean, rounded, and subtle shadow */
+    /* Card styling with a 39px border radius and subtle shadow */
     .card {
       position: absolute;
       width: 90%;
@@ -40,41 +42,39 @@
       transform: translate(-50%, -50%);
       background-size: cover;
       background-position: center;
-      border-radius: 16px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 39px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       overflow: hidden;
       transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     }
 
-    /* “LIKE” and “NOPE” labels (styled minimally) */
-    .card .like,
-    .card .dislike {
+    /* Gradient overlay at the bottom for message readability */
+    .card::after {
+      content: "";
       position: absolute;
-      top: 20px;
-      font-size: 24px;
-      font-weight: bold;
-      padding: 8px 16px;
-      border: 2px solid;
-      border-radius: 8px;
-      opacity: 0;
-      z-index: 3;
-      user-select: none;
-    }
-    .card .like {
-      left: 20px;
-      color: #28a745;
-      border-color: #28a745;
-      transform: rotate(-15deg);
-    }
-    .card .dislike {
-      right: 20px;
-      color: #dc3545;
-      border-color: #dc3545;
-      transform: rotate(15deg);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 40%;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      z-index: 1;
     }
 
-    /* Final message styling */
-    #no-more {
+    /* Message text styling (you can edit the text later) */
+    .card .message {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 2;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Final message displayed when all cards are swiped away */
+    #final-message {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -83,94 +83,82 @@
       color: #333;
       text-align: center;
       padding: 20px;
-      line-height: 1.5;
     }
   </style>
 </head>
 <body>
-  <!-- The container for swipe cards -->
+  <!-- Container for all the cards -->
   <div id="card-container"></div>
 
   <script>
-    // Replace these image URLs with actual photos of her.
+    // Array of 7 cards with image URLs and placeholder messages.
+    // Replace the URLs and "blah blah" messages with your own content.
     const profiles = [
-      { img: "https://source.unsplash.com/random/400x600?face&sig=1" },
-      { img: "https://source.unsplash.com/random/400x600?face&sig=2" },
-      { img: "https://source.unsplash.com/random/400x600?face&sig=3" },
-      { img: "https://source.unsplash.com/random/400x600?face&sig=4" },
-      { img: "https://source.unsplash.com/random/400x600?face&sig=5" }
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=1", message: "blah blah" },
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=2", message: "blah blah" },
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=3", message: "blah blah" },
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=4", message: "blah blah" },
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=5", message: "blah blah" },
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=6", message: "blah blah" },
+      { img: "https://source.unsplash.com/collection/190727/400x600?sig=7", message: "blah blah" }
     ];
 
     const container = document.getElementById('card-container');
 
-    // Reverse the array so that the first photo is on top.
+    // Create cards in reverse order so the first card appears on top.
     profiles.reverse().forEach(profile => {
       const card = createCard(profile);
       container.appendChild(card);
     });
 
-    // Creates a swipeable card element.
+    // Create a card element that includes a background image and a message overlay.
     function createCard(profile) {
       const card = document.createElement('div');
       card.className = 'card';
       card.style.backgroundImage = `url(${profile.img})`;
 
-      // Create the "LIKE" indicator
-      const like = document.createElement('div');
-      like.className = 'like';
-      like.textContent = "LIKE";
-      card.appendChild(like);
-
-      // Create the "NOPE" indicator
-      const dislike = document.createElement('div');
-      dislike.className = 'dislike';
-      dislike.textContent = "NOPE";
-      card.appendChild(dislike);
+      // Create a message element to show over the image.
+      const message = document.createElement('div');
+      message.className = 'message';
+      message.textContent = profile.message;
+      card.appendChild(message);
 
       addSwipeListeners(card);
       return card;
     }
 
-    // Adds touch-based swipe functionality to a card.
+    // Add touch swipe functionality to a card.
     function addSwipeListeners(card) {
-      let startX = 0;
-      let startY = 0;
-      let currentX = 0;
-      let currentY = 0;
-      let offsetX = 0;
+      let startX = 0, startY = 0;
+      let currentX = 0, currentY = 0;
+      let offsetX = 0, offsetY = 0;
+      let isSwiping = false;
 
       card.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
-        card.style.transition = ''; // Remove transition for immediate response.
+        isSwiping = true;
+        card.style.transition = ''; // Remove any ongoing transition for immediate response.
       }, { passive: true });
 
       card.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
         currentX = e.touches[0].clientX;
         currentY = e.touches[0].clientY;
         offsetX = currentX - startX;
-        const offsetY = currentY - startY;
-        const rotation = offsetX * 0.1;
+        offsetY = currentY - startY;
+        const rotation = offsetX * 0.1;  // A slight rotation based on horizontal movement.
         card.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`;
-
-        // Update the opacity of the like/dislike labels.
-        const like = card.querySelector('.like');
-        const dislike = card.querySelector('.dislike');
-        if (offsetX > 0) {
-          like.style.opacity = Math.min(offsetX / 100, 1);
-          dislike.style.opacity = 0;
-        } else if (offsetX < 0) {
-          dislike.style.opacity = Math.min(-offsetX / 100, 1);
-          like.style.opacity = 0;
-        }
       }, { passive: true });
 
       card.addEventListener('touchend', () => {
-        // If swiped more than 100px horizontally, remove the card.
+        isSwiping = false;
+        // If the horizontal movement exceeds 100px, consider it a swipe.
         if (Math.abs(offsetX) > 100) {
           const direction = offsetX > 0 ? 1 : -1;
           card.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
-          card.style.transform = `translate(${direction * window.innerWidth}px, 0px) rotate(${direction * 45}deg)`;
+          // Animate card off-screen.
+          card.style.transform = `translate(${direction * window.innerWidth}px, ${offsetY}px) rotate(${direction * 45}deg)`;
           card.style.opacity = 0;
           setTimeout(() => {
             card.remove();
@@ -179,21 +167,19 @@
             }
           }, 500);
         } else {
-          // Snap back if not swiped far enough.
+          // Otherwise, snap back to the original position.
           card.style.transition = 'transform 0.3s ease-out';
           card.style.transform = 'translate(0px, 0px) rotate(0deg)';
-          card.querySelector('.like').style.opacity = 0;
-          card.querySelector('.dislike').style.opacity = 0;
         }
       });
     }
 
-    // Displays the final "I love you" message.
+    // Display a final message when all cards have been swiped.
     function showFinalMessage() {
-      const message = document.createElement('div');
-      message.id = 'no-more';
-      message.innerHTML = "I love you <br> ❤️";
-      container.appendChild(message);
+      const finalMsg = document.createElement('div');
+      finalMsg.id = 'final-message';
+      finalMsg.innerHTML = "I love you ❤️";
+      container.appendChild(finalMsg);
     }
   </script>
 </body>
