@@ -2,159 +2,160 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Swipe It Like a Pro</title>
+  <!-- Set the viewport for a mobile-friendly experience -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swipe Cards Demo</title>
   <style>
-    /* Reset & basic styles */
-    * { box-sizing: border-box; }
-    body {
+    /* Reset and basic styles */
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
       margin: 0;
       padding: 0;
-      background: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: 'Arial', sans-serif;
-    }
-    /* Container for the swipe cards */
-    .card-container {
-      width: 300px;
-      height: 400px;
-      position: relative;
-    }
-    /* The swipe cards */
-    .card {
-      width: 100%;
       height: 100%;
+      background-color: #f0f2f5;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    /* Container holding all cards */
+    #card-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* Each card styling */
+    .card {
+      position: absolute;
+      width: 90%;
+      max-width: 400px;
+      height: 70%;
+      left: 50%;
+      top: 50%;
+      /* Center the card */
+      transform: translate(-50%, -50%);
       background: #fff;
       border-radius: 10px;
-      position: absolute;
-      top: 0;
-      left: 0;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      font-size: 2rem;
+      justify-content: flex-start;
+      /* Smooth transition for snapping back or swiping off */
+      transition: transform 0.3s ease-out;
+      /* Prevent text selection during swiping */
       user-select: none;
-      transition: transform 0.3s ease, opacity 0.3s ease;
     }
-    /* Message for when profiles run out */
+    /* Card image styling */
+    .card img {
+      width: 100%;
+      height: auto;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    /* Card info (name) styling */
+    .card-info {
+      padding: 15px;
+      font-size: 22px;
+      text-align: center;
+    }
+    /* “No more profiles” message styling */
     .no-more {
-      font-size: 2rem;
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
       color: #333;
     }
   </style>
 </head>
 <body>
-  <div class="card-container">
-    <!-- The cards are stacked; the last one in the HTML is the top card -->
-    <div class="card" style="background: #ffadad;">Profile 6</div>
-    <div class="card" style="background: #ffd6a5;">Profile 5</div>
-    <div class="card" style="background: #fdffb6;">Profile 4</div>
-    <div class="card" style="background: #caffbf;">Profile 3</div>
-    <div class="card" style="background: #9bf6ff;">Profile 2</div>
-    <div class="card" style="background: #a0c4ff;">Profile 1</div>
-  </div>
+  <!-- Container for the swipeable cards -->
+  <div id="card-container"></div>
 
   <script>
-    // Gen Z swipe magic starts here
-    let isDragging = false,
-        startX,
-        startY,
-        currentX,
-        currentY,
-        dx = 0,
-        dy = 0,
-        activeCard = null;
-    const threshold = 100; // how many pixels to trigger a swipe
+    // Set a threshold in pixels for a successful swipe
+    const swipeThreshold = 100; 
 
-    // Set up event listeners on the top card
-    function setupCard(card) {
-      card.addEventListener('mousedown', dragStart);
-      card.addEventListener('touchstart', dragStart, { passive: false });
+    // These functions use 'this' to refer to the card element being touched.
+    function handleTouchStart(e) {
+      // Remove any ongoing transition so the card follows your finger
+      this.style.transition = '';
+      // Store the starting X/Y coordinates on the card element
+      this.startX = e.touches[0].clientX;
+      this.startY = e.touches[0].clientY;
+      // Attach move and end listeners to this card
+      this.addEventListener('touchmove', handleTouchMove);
+      this.addEventListener('touchend', handleTouchEnd);
     }
 
-    // When you start dragging
-    function dragStart(e) {
-      e.preventDefault();
-      if (e.type === 'touchstart') {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-      } else {
-        startX = e.clientX;
-        startY = e.clientY;
-      }
-      isDragging = true;
-      activeCard = e.currentTarget;
-      activeCard.style.transition = 'none';
+    function handleTouchMove(e) {
+      // Calculate how far the finger has moved from the start point
+      const dx = e.touches[0].clientX - this.startX;
+      const dy = e.touches[0].clientY - this.startY;
+      // Rotate a bit for a natural feel (rotation is proportional to horizontal movement)
+      this.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 10}deg)`;
     }
 
-    // When you're dragging around
-    function dragMove(e) {
-      if (!isDragging || !activeCard) return;
-      if (e.type === 'touchmove') {
-        currentX = e.touches[0].clientX;
-        currentY = e.touches[0].clientY;
-      } else {
-        currentX = e.clientX;
-        currentY = e.clientY;
-      }
-      dx = currentX - startX;
-      dy = currentY - startY;
-      // Add a bit of rotation based on horizontal movement
-      let rotate = dx * 0.1;
-      activeCard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`;
-    }
+    function handleTouchEnd(e) {
+      // Remove the move and end listeners now that the touch is finished
+      this.removeEventListener('touchmove', handleTouchMove);
+      this.removeEventListener('touchend', handleTouchEnd);
 
-    // When you let go of the card
-    function dragEnd(e) {
-      if (!isDragging || !activeCard) return;
-      isDragging = false;
-      activeCard.style.transition = 'transform 0.3s ease';
-      // If you dragged far enough, swipe the card out
-      if (Math.abs(dx) > threshold) {
-        let direction = dx > 0 ? 1 : -1;
-        activeCard.style.transform = `translate(${direction * 1000}px, ${dy}px) rotate(${direction * 45}deg)`;
-        activeCard.addEventListener('transitionend', function () {
-          activeCard.remove();
-          checkCards();
+      const dx = e.changedTouches[0].clientX - this.startX;
+      // Check if the horizontal movement is more than the threshold
+      if (Math.abs(dx) > swipeThreshold) {
+        // Determine which direction and swipe the card off screen
+        const toX = dx > 0 ? window.innerWidth : -window.innerWidth;
+        this.style.transition = 'transform 0.3s ease-out';
+        this.style.transform = `translate(${toX}px, 0px) rotate(${dx / 10}deg)`;
+        // After the transition ends, remove the card and update the top card
+        this.addEventListener('transitionend', function () {
+          this.remove();
+          updateTopCard();
         }, { once: true });
       } else {
-        // Otherwise, snap back to center
-        activeCard.style.transform = 'translate(0px, 0px) rotate(0deg)';
+        // If not swiped far enough, snap back to the original center position
+        this.style.transition = 'transform 0.3s ease-out';
+        this.style.transform = '';
+        // Clean up after the snap-back animation completes
+        this.addEventListener('transitionend', function () {
+          this.style.transition = '';
+        }, { once: true });
       }
-      dx = 0;
-      dy = 0;
     }
 
-    // Listen for mouse/touch movements globally
-    document.addEventListener('mousemove', dragMove);
-    document.addEventListener('touchmove', dragMove, { passive: false });
-    document.addEventListener('mouseup', dragEnd);
-    document.addEventListener('touchend', dragEnd);
-
-    // Check if there are any cards left; if not, show a message
-    function checkCards() {
-      const remainingCards = document.querySelectorAll('.card-container .card');
-      if (remainingCards.length === 0) {
-        const message = document.createElement('div');
-        message.className = 'no-more';
-        message.textContent = 'No more profiles, fam!';
-        document.body.appendChild(message);
+    // After a card is removed, attach the touchstart listener to the new top card.
+    function updateTopCard() {
+      const cards = document.querySelectorAll('.card');
+      if (cards.length > 0) {
+        // The top card is the last one in the container (highest z-index)
+        const topCard = cards[cards.length - 1];
+        topCard.addEventListener('touchstart', handleTouchStart);
       } else {
-        // Set up the next top card
-        const newTop = remainingCards[remainingCards.length - 1];
-        setupCard(newTop);
+        // If there are no cards left, show a message.
+        showNoMoreProfiles();
       }
     }
 
-    // Initialize the top card (the last card in the container)
-    const cards = document.querySelectorAll('.card-container .card');
-    if (cards.length > 0) {
-      setupCard(cards[cards.length - 1]);
+    function showNoMoreProfiles() {
+      const container = document.getElementById('card-container');
+      const message = document.createElement('div');
+      message.className = 'no-more';
+      message.textContent = 'No more profiles';
+      container.appendChild(message);
     }
-  </script>
-</body>
-</html>
+
+    // When the DOM is loaded, create our card elements.
+    document.addEventListener('DOMContentLoaded', function () {
+      // Array of profile objects (each with a name and an image URL).
+      const profiles = [
+        { name: "Alice", image: "https://via.placeholder.com/400x600?text=Alice" },
+       
+
