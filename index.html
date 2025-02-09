@@ -1,1 +1,160 @@
-something's cooking
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Swipe It Like a Pro</title>
+  <style>
+    /* Reset & basic styles */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Arial', sans-serif;
+    }
+    /* Container for the swipe cards */
+    .card-container {
+      width: 300px;
+      height: 400px;
+      position: relative;
+    }
+    /* The swipe cards */
+    .card {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 10px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      user-select: none;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    /* Message for when profiles run out */
+    .no-more {
+      font-size: 2rem;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container">
+    <!-- The cards are stacked; the last one in the HTML is the top card -->
+    <div class="card" style="background: #ffadad;">Profile 6</div>
+    <div class="card" style="background: #ffd6a5;">Profile 5</div>
+    <div class="card" style="background: #fdffb6;">Profile 4</div>
+    <div class="card" style="background: #caffbf;">Profile 3</div>
+    <div class="card" style="background: #9bf6ff;">Profile 2</div>
+    <div class="card" style="background: #a0c4ff;">Profile 1</div>
+  </div>
+
+  <script>
+    // Gen Z swipe magic starts here
+    let isDragging = false,
+        startX,
+        startY,
+        currentX,
+        currentY,
+        dx = 0,
+        dy = 0,
+        activeCard = null;
+    const threshold = 100; // how many pixels to trigger a swipe
+
+    // Set up event listeners on the top card
+    function setupCard(card) {
+      card.addEventListener('mousedown', dragStart);
+      card.addEventListener('touchstart', dragStart, { passive: false });
+    }
+
+    // When you start dragging
+    function dragStart(e) {
+      e.preventDefault();
+      if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      } else {
+        startX = e.clientX;
+        startY = e.clientY;
+      }
+      isDragging = true;
+      activeCard = e.currentTarget;
+      activeCard.style.transition = 'none';
+    }
+
+    // When you're dragging around
+    function dragMove(e) {
+      if (!isDragging || !activeCard) return;
+      if (e.type === 'touchmove') {
+        currentX = e.touches[0].clientX;
+        currentY = e.touches[0].clientY;
+      } else {
+        currentX = e.clientX;
+        currentY = e.clientY;
+      }
+      dx = currentX - startX;
+      dy = currentY - startY;
+      // Add a bit of rotation based on horizontal movement
+      let rotate = dx * 0.1;
+      activeCard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`;
+    }
+
+    // When you let go of the card
+    function dragEnd(e) {
+      if (!isDragging || !activeCard) return;
+      isDragging = false;
+      activeCard.style.transition = 'transform 0.3s ease';
+      // If you dragged far enough, swipe the card out
+      if (Math.abs(dx) > threshold) {
+        let direction = dx > 0 ? 1 : -1;
+        activeCard.style.transform = `translate(${direction * 1000}px, ${dy}px) rotate(${direction * 45}deg)`;
+        activeCard.addEventListener('transitionend', function () {
+          activeCard.remove();
+          checkCards();
+        }, { once: true });
+      } else {
+        // Otherwise, snap back to center
+        activeCard.style.transform = 'translate(0px, 0px) rotate(0deg)';
+      }
+      dx = 0;
+      dy = 0;
+    }
+
+    // Listen for mouse/touch movements globally
+    document.addEventListener('mousemove', dragMove);
+    document.addEventListener('touchmove', dragMove, { passive: false });
+    document.addEventListener('mouseup', dragEnd);
+    document.addEventListener('touchend', dragEnd);
+
+    // Check if there are any cards left; if not, show a message
+    function checkCards() {
+      const remainingCards = document.querySelectorAll('.card-container .card');
+      if (remainingCards.length === 0) {
+        const message = document.createElement('div');
+        message.className = 'no-more';
+        message.textContent = 'No more profiles, fam!';
+        document.body.appendChild(message);
+      } else {
+        // Set up the next top card
+        const newTop = remainingCards[remainingCards.length - 1];
+        setupCard(newTop);
+      }
+    }
+
+    // Initialize the top card (the last card in the container)
+    const cards = document.querySelectorAll('.card-container .card');
+    if (cards.length > 0) {
+      setupCard(cards[cards.length - 1]);
+    }
+  </script>
+</body>
+</html>
