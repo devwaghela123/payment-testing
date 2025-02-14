@@ -87,12 +87,11 @@
   </style>
 </head>
 <body>
-  <!-- Container for all the cards -->
+  <!-- card container -->
   <div id="card-container"></div>
 
   <script>
-    // Array of 7 cards with image URLs and placeholder messages.
-    // Replace the URLs and "blah blah" messages with your own content.
+    // all cards 
     const profiles = [
       { img: "4.jpeg", message: "From the very first moment I saw you, time seemed to slow down. In that brief instant, your light transformed the ordinary into a breathtaking masterpiece, and I knew I had witnessed something extraordinary" },
       { img: "6.jpeg", message: "Every day with you feels like a scene from a timeless film—where your smile is the sunrise that warms my soul, and your laughter writes poetry on my heart. You make every moment unforgettable" },
@@ -105,19 +104,19 @@
 
     const container = document.getElementById('card-container');
 
-    // Create cards in reverse order so the first card appears on top.
+    // card order
     profiles.reverse().forEach(profile => {
       const card = createCard(profile);
       container.appendChild(card);
     });
 
-    // Create a card element that includes a background image and a message overlay.
+    // prevent overlay
     function createCard(profile) {
       const card = document.createElement('div');
       card.className = 'card';
       card.style.backgroundImage = `url(${profile.img})`;
 
-      // Create a message element to show over the image.
+      // message on cards
       const message = document.createElement('div');
       message.className = 'message';
       message.textContent = profile.message;
@@ -127,7 +126,7 @@
       return card;
     }
 
-    // Add touch swipe functionality to a card.
+    // swipe function
     function addSwipeListeners(card) {
       let startX = 0, startY = 0;
       let currentX = 0, currentY = 0;
@@ -138,7 +137,7 @@
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         isSwiping = true;
-        card.style.transition = ''; // Remove any ongoing transition for immediate response.
+        card.style.transition = ''; // ui adj.
       }, { passive: true });
 
       card.addEventListener('touchmove', (e) => {
@@ -147,13 +146,13 @@
         currentY = e.touches[0].clientY;
         offsetX = currentX - startX;
         offsetY = currentY - startY;
-        const rotation = offsetX * 0.1;  // A slight rotation based on horizontal movement.
+        const rotation = offsetX * 0.1;  // ui adjustments
         card.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`;
       }, { passive: true });
 
       card.addEventListener('touchend', () => {
         isSwiping = false;
-        // If the horizontal movement exceeds 100px, consider it a swipe.
+        // ui adjustments
         if (Math.abs(offsetX) > 100) {
           const direction = offsetX > 0 ? 1 : -1;
           card.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
@@ -174,7 +173,7 @@
       });
     }
 
-    // Display a final message when all cards have been swiped.
+    // the final msg
     function showFinalMessage() {
       const finalMsg = document.createElement('div');
       finalMsg.id = 'final-message';
